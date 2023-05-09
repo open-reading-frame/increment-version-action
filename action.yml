@@ -1,0 +1,62 @@
+name: increment-version-action
+description: Create + push new tag based on calling repo's current version and version information in a metadata JSON file
+
+inputs:
+  json:
+    description: Path to metadata JSON file containing version
+    required: true
+    default: repo-data.json
+  use-date:
+    description: Include a date string in the tag
+    required: false
+    default: false
+  protect-tag:
+    description: Protect tag from being modified or deleted
+    required: false
+    default: false
+
+outputs:
+  new-version:
+    description: The newly tagged version
+    value: ${{ steps.output-new-version.outputs.new-version }}
+
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout calling repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Pull tags down
+      shell: bash
+      run: git fetch origin --tags
+    - name: Set up orf-utils
+      uses: actions/setup-python-action@main
+      with:
+        packages: orf_utils
+    - name: Set up git user based on current action environment
+      uses: fregante/setup-git-user@v1
+    - name: Run tag_commit.py with given arguments - lays down a new tag or errors if specified version is invalid
+      shell: bash
+      run: |
+        tag_commit \
+          -r . \
+          -j ${{ inputs.json }} \
+          ${{ (fromJson(inputs.use-date) && '-d') || '' }}
+    - name: Set new-version output
+      id: output-new-version
+      shell: bash
+      run: echo "new-version=$(git describe --tags)" >> $GITHUB_OUTPUT
+    - name: Push new tag to GitHub - only runs when the calling workflow was triggered by a push event to default branch
+      if: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch }}
+      shell: bash
+      run: git push --tags
+    - name: Protect tag
+      if: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch && fromJson(inputs.protect-tag)}}
+      shell: bash
+      run: |
+        curl -u ${{ github.token }}:x-oauth-basic -X POST -d '{"pattern": "${{ steps.output-new-version.outputs.new-version }}"}' \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/${{ github.repository }}/tags/protection
+
