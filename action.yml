@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: git fetch origin --tags
     - name: Set up orf-utils
-      uses: actions/setup-python-action@main
+      uses: open-reading-frame/setup-python-action@main
       with:
         packages: orf_utils
     - name: Set up git user based on current action environment
