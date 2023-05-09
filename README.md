@@ -4,11 +4,10 @@ This action will create a new tag based on a version in a JSON file in source co
 This is intended to help automate semantic versioning (https://semver.org/) tags for repositories for each PR merge to main (or another default branch).
 Version tags will be generated in the format `major.minor.patch-release` with a date string optionally appended to the tag if specified in the calling workflow.
 If the version is not changed for a given PR, the `release` number will be incremented by 1, intended to reflect changes to things like process, build, docs, tests, etc. that do not impact actual code.
-A boolean flag may be provided to optionally protect the new tag in GitHub so that it cannot be deleted by anyone other that repository admins.
-To protect the tag, a token with write Administration access must be provided.
-See [Permissions required for fine-grained personal access tokens](https://docs.github.com/en/rest/overview/permissions-required-for-fine-grained-personal-access-tokens#administration).
 The new version will be set as an output of the action called `outputs.new-version`.
 This value can be used in subsequent steps/jobs where a version identifier is needed.
+
+## A note on tag protection
 
 ## Example
 
