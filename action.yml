@@ -6,10 +6,6 @@ inputs:
     description: Path to metadata JSON file containing version
     required: true
     default: repo-data.json
-  use-date:
-    description: Include a date string in the tag
-    required: false
-    default: false
   token:
     description: Token with permissions to push tags, including against any tag protection rules
     required: false
@@ -43,8 +39,7 @@ runs:
       run: |
         tag_commit \
           -r . \
-          -j ${{ inputs.json }} \
-          ${{ (fromJson(inputs.use-date) && '-d') || '' }}
+          -j ${{ inputs.json }}
     - name: Set new-version output
       id: output-new-version
       shell: bash
