@@ -16,7 +16,8 @@ inputs:
     default: false
   token:
     description: Token with permissions to push tags and add tag protection rules
-    required: true
+    required: false
+    default: ${{ github.token }}
 
 outputs:
   new-version:
